@@ -11,10 +11,12 @@ class TestCourier:
         response, _ = regist_courier
         
         # Проверяем статус-код
-        assert response.status_code == 201, f"Expected status code 201, got {response.status_code}"
+        with allure.step("Проверка статус кода 201"):
+            assert response.status_code == 201, f"Expected status code 201, got {response.status_code}"
         
         # Проверяем тело ответа
-        assert response.json() == {"ok": True}, f"Expected response {{'ok': True}}, got {response.json()}"
+        with allure.step("Проверка данных ответа"):
+            assert response.json() == {"ok": True}, f"Expected response {{'ok': True}}, got {response.json()}"
 
     @allure.title('Проверка попытки создания курьера с существующим логином')
     @allure.description('Проверяем, что нельзя создать пользователя используя уже существующий логин')
@@ -24,13 +26,16 @@ class TestCourier:
         response, payload = regist_courier
                 
         # Пытаемся создать курьера с тем же логином
-        response = requests.post(REGIST_URL, json=payload)
+        with allure.step("Регистрация пользователя с уже существующими данными"):
+            response = requests.post(REGIST_URL, json=payload)
         
         # Проверяем статус-код
-        assert response.status_code == 409, f"Expected status code 409, got {response.status_code}"
+        with allure.step("Проверка кода 409"):
+            assert response.status_code == 409, f"Expected status code 409, got {response.status_code}"
         
         # Проверяем тело ответа
-        assert response.json()["message"] == "Этот логин уже используется. Попробуйте другой.", f"Unexpected response: {response.json()}"
+        with allure.step("Проверка данных ответа"):
+            assert response.json()["message"] == "Этот логин уже используется. Попробуйте другой.", f"Unexpected response: {response.json()}"
 
     @allure.title('Проверка, что без обязательных полей запрос выдаст ошибку')
     @allure.description('Проверяем, что нельзя создавать аккаунт без логина или пароля')
@@ -41,14 +46,16 @@ class TestCourier:
             payload = create_courier
             # Удаляем одно обязательное поле
             del payload[field]
-            
-            response = requests.post(REGIST_URL, json=payload)
+            with allure.step("Регистрация с частью данных"):
+                response = requests.post(REGIST_URL, json=payload)
             
             # Проверяем статус-код
-            assert response.status_code == 400, f"Expected status code 400 when missing {field}, got {response.status_code}"
+            with allure.step("Проверка статус кода 400"):
+                assert response.status_code == 400, f"Expected status code 400 when missing {field}, got {response.status_code}"
             
             # Проверяем тело ответа
-            assert response.json()["message"] == "Недостаточно данных для создания учетной записи", f"Unexpected response when missing {field}: {response.json()}"
+            with allure.step("Проверка сообщения из ответа"):
+                assert response.json()["message"] == "Недостаточно данных для создания учетной записи", f"Unexpected response when missing {field}: {response.json()}"
 
     #Тест невалидных данных при создании курьера
     @allure.title('Проверка невалидных данных при создании курьера')
@@ -61,10 +68,13 @@ class TestCourier:
             "password": "",
             "firstName": ""
         }
-        response = requests.post(REGIST_URL, json=payload)
+        with allure.step("Регистрация с пустыми данными"):
+            response = requests.post(REGIST_URL, json=payload)
         
         # Проверяем статус-код
-        assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
+        with allure.step("Проверка статус кода 400"):
+            assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
         
         # Проверяем тело ответа
-        assert response.json()["message"] == "Недостаточно данных для создания учетной записи", f"Unexpected response: {response.json()}"
+        with allure.step("Проверка текст сообщения"):
+            assert response.json()["message"] == "Недостаточно данных для создания учетной записи", f"Unexpected response: {response.json()}"

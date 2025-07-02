@@ -17,12 +17,15 @@ class TestCreateOrder:
             payload["color"] = color
 
         # Отправляем запрос на создание заказа
-        response = requests.post(ORDER_URL, json=payload)
+        with allure.step("Отправка запроса на авторизацию"):
+            response = requests.post(ORDER_URL, json=payload)
 
         # Проверяем статус-код
-        assert response.status_code == 201, f"Expected 201, got {response.status_code}. Response: {response.text}"
+        with allure.step("Проверка кода 201"):
+            assert response.status_code == 201, f"Expected 201, got {response.status_code}. Response: {response.text}"
 
         # Проверяем наличие поля 'track'
         response_json = response.json()
-        assert "track" in response_json, f"Expected 'track' in response, got {response_json}"
-        assert isinstance(response_json["track"], int), f"Expected 'track' as integer, got {type(response_json['track'])}"
+        with allure.step("Проверка добавленных данных"):  
+            assert "track" in response_json, f"Expected 'track' in response, got {response_json}"
+            assert isinstance(response_json["track"], int), f"Expected 'track' as integer, got {type(response_json['track'])}"

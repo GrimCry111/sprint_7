@@ -1,7 +1,7 @@
 import pytest
 import random
 import requests
-from tests.urls import REGIST_URL
+from urls import REGIST_URL
 from faker import Faker
 import allure
 
