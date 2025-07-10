@@ -1,44 +1,6 @@
-import pytest
-import requests
-from urls import ORDER_URL
 import allure
+import helper
 
-@allure.step("Отправка GET-запроса")
-def send_get_request(params=None):
-    return requests.get(ORDER_URL, params=params)
-
-@allure.step("Проверка статус-кода")
-def assert_status_code(response, expected_status):
-    assert response.status_code == expected_status, \
-        f"Expected {expected_status}, got {response.status_code}. Response: {response.text}"
-
-@allure.step("Проверка сообщения об ошибке")
-def assert_error_message(response, error_message):
-    assert response.json()["message"] == error_message, \
-        f"Expected error message: {error_message}, got {response.json()['message']}"
-
-@allure.step("Проверка наличия списка заказов")
-def assert_orders_present(response_json):
-    assert "orders" in response_json, "Expected 'orders' in response"
-    assert isinstance(response_json["orders"], list), "'orders' should be a list"
-
-@allure.step("Проверка наличия pageInfo")
-def assert_page_info_present(response_json):
-    assert "pageInfo" in response_json, "Expected 'pageInfo' in response"
-    assert "page" in response_json["pageInfo"], "'pageInfo' should contain 'page'"
-    assert "total" in response_json["pageInfo"], "'pageInfo' should contain 'total'"
-    assert "limit" in response_json["pageInfo"], "'pageInfo' should contain 'limit'"
-
-@allure.step("Проверка наличия availableStations")
-def assert_available_stations_present(response_json):
-    assert "availableStations" in response_json, "Expected 'availableStations' in response"
-    assert isinstance(response_json["availableStations"], list), "'availableStations' should be a list"
-
-@allure.step("Отправка GET-запроса")
-def send_get_request(params=None):
-    return requests.get(ORDER_URL, params=params)
-
-# Основной тестовый класс
 @allure.feature("Получение списка заказов")
 class TestGetOrders:
 
@@ -53,14 +15,13 @@ class TestGetOrders:
             "check_stations": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_page_info_present(response_json)
-            assert_available_stations_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_page_info_present(response_json)
+        helper.assert_available_stations_present(response_json)
 
     @allure.title("Получение заказов с существующим courierId")
     @allure.description("Проверка успешного ответа с данными курьера")
@@ -72,13 +33,12 @@ class TestGetOrders:
             "check_page_info": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_page_info_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_page_info_present(response_json)
 
     @allure.title("Получение заказов с несуществующим courierId")
     @allure.description("Проверка ошибки 404 и сообщения об отсутствии курьера")
@@ -89,9 +49,9 @@ class TestGetOrders:
             "error_message": "Курьер с идентификатором 999999 не найден"
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
-        assert_error_message(response, expected["error_message"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
+        helper.assert_error_message(response, expected["error_message"])
 
     @allure.title("Получение заказов: первая страница пагинации")
     @allure.description("Проверка успешного ответа с пагинацией (page=0, limit=1)")
@@ -103,13 +63,12 @@ class TestGetOrders:
             "check_page_info": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_page_info_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_page_info_present(response_json)
 
     @allure.title("Получение заказов: вторая страница пагинации")
     @allure.description("Проверка успешного ответа с пагинацией (page=1, limit=1)")
@@ -121,13 +80,12 @@ class TestGetOrders:
             "check_page_info": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_page_info_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_page_info_present(response_json)
 
     @allure.title("Получение заказов с nearestStation (одна станция)")
     @allure.description("Проверка успешного ответа и доступных станций")
@@ -139,13 +97,12 @@ class TestGetOrders:
             "check_stations": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_available_stations_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_available_stations_present(response_json)
 
     @allure.title("Получение заказов с nearestStation (несколько станций)")
     @allure.description("Проверка успешного ответа и доступных станций")
@@ -157,10 +114,9 @@ class TestGetOrders:
             "check_stations": True
         }
 
-        response = send_get_request(params)
-        assert_status_code(response, expected["expected_status"])
+        response = helper.send_get_request(params)
+        helper.assert_status_code(response, expected["expected_status"])
         response_json = response.json()
 
-        if expected["expected_status"] == 200:
-            assert_orders_present(response_json)
-            assert_available_stations_present(response_json)
+        helper.assert_orders_present(response_json)
+        helper.assert_available_stations_present(response_json)
