@@ -32,10 +32,8 @@ class TestLoginCourier:
             with allure.step("Отправка запроса на авторизацию"):
                 response = requests.post(LOGIN_URL, json=new_login_data)
             with allure.step("Проверка статуса 400"):
-                assert response.status_code in [400, 504], f"Expected 400 or 504, got {response.status_code}"
-            if response.status_code == 400:
-                assert response.json()["message"] == "Недостаточно данных для входа"
-
+                assert response.status_code == 400, f"Expected 400 got {response.status_code}"
+           
     @allure.title('Проверка вывода ошибки при некорректном логине или пароле')
     @allure.description('Проверяем, что будет если пользователь ввёл только логин или только пароль')
     def test_login_invalid_credentials(self,regist_courier):

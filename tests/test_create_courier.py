@@ -6,9 +6,10 @@ class TestCourier:
 
     @allure.title('Проверка успешного создания курьера')
     @allure.description('Проверяем, что можно создать нового курьера')
-    def test_create_courier_success(self,regist_courier):
+    def test_create_courier_success(self,create_courier):
     
-        response, _ = regist_courier
+        with allure.step("Зарегестрируем пользователя"):    
+            response = requests.post(REGIST_URL, json=create_courier)
         
         # Проверяем статус-код
         with allure.step("Проверка статус кода 201"):
